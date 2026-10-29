@@ -381,6 +381,7 @@ dispatch :: proc(p: ^Parser) -> (err: Error) {
 	type := string(p.event_type[:]) if len(p.event_type) > 0 else DEFAULT_EVENT_TYPE
 
 	ev := event_clone(Event{type = type, data = string(data), id = string(p.id_buffer[:])}, p.allocator) or_return
+	compact_queue(p)
 	if _, aerr := append(&p.queue, ev); aerr != nil {
 		event_destroy(&ev, p.allocator)
 		return aerr
@@ -388,6 +389,23 @@ dispatch :: proc(p: ^Parser) -> (err: Error) {
 	clear(&p.data)
 	clear(&p.event_type)
 	return nil
+}
+
+/*
+compact_queue drops the slots parser_next already consumed once they make up
+at least half the queue. Without it, a consumer that always leaves an event
+queued would make the queue grow for the whole life of the stream. Moving at
+most as many events as were consumed keeps the cost amortized O(1) per event.
+*/
+@(private = "file")
+compact_queue :: proc(p: ^Parser) {
+	if p.head == 0 || p.head * 2 < len(p.queue) {
+		return
+	}
+	pending := len(p.queue) - p.head
+	copy(p.queue[:pending], p.queue[p.head:])
+	resize(&p.queue, pending)
+	p.head = 0
 }
 
 /*

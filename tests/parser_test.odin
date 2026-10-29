@@ -454,3 +454,22 @@ test_feed_reports_allocator_error :: proc(t: ^testing.T) {
 	err := sse.parser_feed(&p, transmute([]byte)string("data: x\n\n"))
 	testing.expect_value(t, err, sse.Error(mem.Allocator_Error.Out_Of_Memory))
 }
+
+// A consumer that always leaves one event queued must not make the queue grow without bound.
+@(test)
+test_queue_stays_bounded_with_backlog :: proc(t: ^testing.T) {
+	p: sse.Parser
+	sse.parser_init(&p)
+	defer sse.parser_destroy(&p)
+
+	frame := transmute([]byte)string("data: a\n\n")
+	testing.expect_value(t, sse.parser_feed(&p, frame), nil)
+	for _ in 0 ..< 1000 {
+		testing.expect_value(t, sse.parser_feed(&p, frame), nil)
+		ev, ok := sse.parser_next(&p)
+		testing.expect(t, ok)
+		testing.expect_value(t, ev.data, "a")
+	}
+	testing.expect_value(t, sse.parser_pending(&p), 1)
+	testing.expectf(t, len(p.queue) <= 4, "queue holds %d slots for 1 pending event", len(p.queue))
+}
