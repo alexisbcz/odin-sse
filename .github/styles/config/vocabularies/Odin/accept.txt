@@ -77,3 +77,14 @@ WebAssembly
 WebSocket(s)?
 Xcode
 XCTest
+odin-sse
+sse_tests
+SSE
+WHATWG
+CRLF
+BOM
+UTF-8
+[Kk]eep-alive
+[Bb]ackoff
+[Jj]itter
+[Rr]econnect(s|ing|ion)?
