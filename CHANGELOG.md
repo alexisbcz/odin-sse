@@ -6,6 +6,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-29
+
+### Fixed
+
+- The parser's event queue no longer grows without bound when the consumer always leaves at least one event queued. The parser now drops consumed slots before it queues new events.
+
 ## [0.1.0] - 2026-10-29
 
 ### Added
@@ -19,5 +25,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - `Reconnect`, a reconnection helper with the last event ID, the `retry` delay, exponential backoff, jitter and an attempt limit.
 - `check_response` and `is_event_stream` for the spec's rule on which responses open a stream.
 
-[Unreleased]: https://github.com/alexisbcz/odin-sse/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/alexisbcz/odin-sse/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/alexisbcz/odin-sse/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/alexisbcz/odin-sse/releases/tag/v0.1.0
